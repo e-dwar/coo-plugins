@@ -1,19 +1,20 @@
 package plugins;
-import java.swing.Timer;
-import java.swing.TimerTask;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.Timer;
 public class TimePrinter
 {
     public static void main (String[] args)
     {
-        Timer timer = new Timer();
-        System.out.println("---- timer");
-        timer.schedule(new TimerTask() {
-            public void run () {
-                System.out.println(
-                    java.util.Calendar.getInstance().getTime()
-                ); 
-            }
-        }, 0, 1000);
+    	int delay = 1000; //milliseconds
+    	  ActionListener taskPerformer = new ActionListener() {
+    	      public void actionPerformed(ActionEvent evt) {
+    	         System.out.println("debug "+evt.getActionCommand());
+    	      }
+    	  };
+    	  new Timer(delay, taskPerformer).start();
+    	  while(true);
     }
+  
 }
