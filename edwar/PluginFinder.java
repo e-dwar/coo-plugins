@@ -11,8 +11,8 @@ public class PluginFinder
         filter = new PluginFilter();
     }
 
-    public String[] listBytecodeFiles ()
+    public File[] listBytecodeFiles ()
     {
-        return file.list(filter);
+        return file.listFiles(filter);
     }
 }
