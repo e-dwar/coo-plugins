@@ -36,6 +36,7 @@ public class PluginFinder implements ActionListener {
      */
     public void initToDateListFiles() {
     	upToDateFileTab = file.listFiles(filter);
+		System.out.println(upToDateFileTab == null ? "NULL" : "pas null");
     	upToDateFileTemp = upToDateFileTab; 
     	for(int i = 0; i < upToDateFileTemp.length; i++) {
     		System.out.println(upToDateFileTemp[0]);
