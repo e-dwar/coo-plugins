@@ -7,7 +7,7 @@ public class PluginFinderMain
 {
     public static void main (String[] args)
     {
-        PluginFinder finder = new PluginFinder(".");
+        final PluginFinder finder = new PluginFinder(".");
 
         new Timer(2 * 1000, new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
