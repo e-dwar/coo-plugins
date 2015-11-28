@@ -11,11 +11,9 @@ public abstract class PluginListener implements ActionListener{
 	/*
 	 * Constructors
 	 */
-	public PluginListener() {
-
-	}
 	
 	/*
 	 * Methods
 	 */
+	
 }

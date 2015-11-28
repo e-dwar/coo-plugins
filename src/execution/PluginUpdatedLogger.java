@@ -1,15 +1,15 @@
 package execution;
 
 import java.awt.event.ActionEvent;
-import event.*;
 
-public class PluginUpdatedLogger<E extends PluginEvent> extends PluginListener {
+public class PluginUpdatedLogger extends PluginListener {
 
-	public PluginUpdatedLogger() {
-	}
+	/*
+	 * Methods
+	 */
 	
 	public void actionPerformed(ActionEvent e) {
-
+		System.out.println("a plugin has beed updated.");
 	}
 
 }
