@@ -35,9 +35,6 @@ public class PluginFinder implements ActionListener {
     
     /**
      * Set the files list of <code>this<code> file directory.
-     * RETURN A SUPPRIMER
-     * @return 
-     * @return 
      */
 
     public void setNewList() {
@@ -57,12 +54,10 @@ public class PluginFinder implements ActionListener {
     		map.put(typeEvent,addList);
     	}
     	if (typeEvent == Event.delete) {
-    		map.put(typeEvent,deleteList);
     		deleteList.add(plugin);
     		map.put(typeEvent,deleteList);
     	}
     	if (typeEvent == Event.update) {
-    		map.put(typeEvent,updateList);
     		updateList.add(plugin);
     		map.put(typeEvent,updateList);
     	}
