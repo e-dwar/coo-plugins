@@ -7,11 +7,7 @@ public class PluginAddedLogger extends PluginListener {
 	/*
 	 * Methods
 	 */
-	public PluginAddedLogger() {
-		
-	}
-	
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent event) {
 		System.out.println("a plugin has beed added.");
 	}
 
