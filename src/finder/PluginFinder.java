@@ -9,69 +9,72 @@ import execution.*;
 
 public class PluginFinder implements ActionListener {
 
-	static protected ArrayList<File> previousCallList;
+	static protected ArrayList<File> pastList;
 	
 	protected File file;
 	protected PluginFilter filter;
-	protected ArrayList<File> upToDateFileList;
-	protected File[] upToDateFileTab;
-	protected File[] upToDateFileTemp;
-	protected Map<String,PluginListener> map;
-	protected List<PluginListener> pluginListeners;
+	protected ArrayList<File> newList;
+	protected Map<Event, ArrayList<PluginListener>> map;
+	protected ArrayList<PluginListener> pluginListeners;
+	protected ArrayList<PluginListener> addList;
+	protected ArrayList<PluginListener> deleteList;
+	protected ArrayList<PluginListener> updateList;
 
     public PluginFinder (String dir) {
     	//if(!new File(dir).exists()) throw new NotAFileException();
         file = new File(dir);
         filter = new PluginFilter();
-        upToDateFileList = new ArrayList<File>();
-        previousCallList = new ArrayList<File>();
+        newList = new ArrayList<File>();
+        pastList = new ArrayList<File>();
         pluginListeners = new ArrayList<PluginListener>();
-        map = new HashMap<String,PluginListener>();
+        map = new HashMap<Event,ArrayList<PluginListener>>();
+        addList = new ArrayList<PluginListener>();
+        deleteList = new ArrayList<PluginListener>();
+        updateList = new ArrayList<PluginListener>();
     }
     
     /**
      * Set the files list of <code>this<code> file directory.
      * RETURN A SUPPRIMER
      * @return 
+     * @return 
      */
-    public void initToDateListFiles() {
-    	upToDateFileTab = file.listFiles(filter);
-		System.out.println(upToDateFileTab == null ? "NULL" : "pas null");
-    	upToDateFileTemp = upToDateFileTab; 
-    	for(int i = 0; i < upToDateFileTemp.length; i++) {
-    		System.out.println(upToDateFileTemp[0]);
+
+    public void setNewList() {
+    	File[] files = file.listFiles(filter);
+    	for(int i = 0; i < files.length; i++) {
+    		newList.add(files[i]);
     	}
-    	//return upToDateFileList;
-    	 
     }
     
-   /* A SUPPRIMER*/
-   public ArrayList<File> getPrevList() {
-	   return previousCallList;
-   }
-    
     /**
-     * Add (ie: register) a listener to <code>this<code> pluginFinder.
+     * Add a listener to <code>this<code> pluginFinder.
      */
-    public void addListeners(PluginListener plugin) {
+    public void addListeners(PluginListener plugin, Event typeEvent) {
     	pluginListeners.add(plugin);
-    }
-    
-    /**
-     * Check if the file is in <code>this</code> toDateList
-     * @return true if the file is in the toDateList
-     */
-    public boolean isInToDateList(File file) {
-    		return upToDateFileList.contains(file);
+    	if (typeEvent == Event.add) {
+    		addList.add(plugin);
+    		map.put(typeEvent,addList);
+    	}
+    	if (typeEvent == Event.delete) {
+    		map.put(typeEvent,deleteList);
+    		deleteList.add(plugin);
+    		map.put(typeEvent,deleteList);
+    	}
+    	if (typeEvent == Event.update) {
+    		map.put(typeEvent,updateList);
+    		updateList.add(plugin);
+    		map.put(typeEvent,updateList);
+    	}
     }
 
     /**
      * Check if files were added between 2 consecutive calls
-     * @return true file has been deleted
+     * @return true a file has been added
      */
     public boolean hasBeenAdded() {
-    	for(File file: upToDateFileList) {
-    		if(!previousCallList.contains(file)) {
+    	for(File file: newList) {
+    		if(!pastList.contains(file)) {
     			return true;
     		}
     	}
@@ -84,8 +87,8 @@ public class PluginFinder implements ActionListener {
      * @return true file has been deleted
      */
     public boolean hasBeenDeleted() {
-    	for(File file: previousCallList) {
-    		if (!upToDateFileList.contains(file)) {
+    	for(File file: pastList) {
+    		if (!newList.contains(file)) {
     			return true;
     		}
     	}
@@ -93,14 +96,14 @@ public class PluginFinder implements ActionListener {
     }
     
     /**
-     * Check if a file has been modified between 2 consecutive calls
-     * @return true if a file was modified between 2 calls
+     * Check if a file has been updated between 2 consecutive calls
+     * @return true if a file was updated between 2 calls
      */
-    public boolean hasBeenModified() {
-    	for(File file: upToDateFileList) {
-        	for(File pfile: previousCallList) {
+    public boolean hasBeenUpdated() {
+    	for(File file: newList) {
+        	for(File pfile: pastList) {
         		if(file.equals(pfile)) {
-        			if(file.lastModified() - pfile.lastModified() <= 1) {
+        			if(System.currentTimeMillis() - file.lastModified() <= 1000) {
         				return true;
         			}
         		}
@@ -115,17 +118,25 @@ public class PluginFinder implements ActionListener {
 	 * @param the action event to be executed.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		System.out.println(previousCallList);
-		initToDateListFiles();
-		System.out.println("up" + upToDateFileList);
-		/*for(PluginListener l : pluginListeners) {
-			System.out.println(upToDateFileList);
-			if(!this.hasBeenAdded()) {
+		setNewList();
+		if(hasBeenAdded()) {
+			for(PluginListener l : map.get(Event.add)) {
 				l.actionPerformed(new ActionEvent(this,0,null));
 			}
-		}*/
-		previousCallList.clear();
-		//previousCallList.addAll(upToDateFileList);
-		//upToDateFileList.clear();
+		}
+		if(hasBeenDeleted()) {
+			for(PluginListener l : map.get(Event.delete)) {
+				l.actionPerformed(new ActionEvent(this,0,null));
+			}
+		}		
+		if(hasBeenUpdated()) {
+			for(PluginListener l : map.get(Event.update)) {
+				l.actionPerformed(new ActionEvent(this,0,null));
+			}
+		}
+		pastList.clear();
+		pastList.addAll(newList);
+		newList.clear();
 	}
+        		
 }
