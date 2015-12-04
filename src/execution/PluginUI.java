@@ -19,9 +19,9 @@ public abstract class PluginUI {
 	 */
 	public PluginUI(PluginFinder pluginFinder){
 		this.pluginFinder = pluginFinder;
-		pluginFinder.addObserver(Event.add, new AddedObserver(this));
-		pluginFinder.addObserver(Event.update, new UpdatedObserver(this));
-		pluginFinder.addObserver(Event.delete, new DeletedObserver(this));
+		pluginFinder.addObserver(Event.ADD, new AddedObserver(this));
+		pluginFinder.addObserver(Event.UPDATE, new UpdatedObserver(this));
+		pluginFinder.addObserver(Event.DELETE, new DeletedObserver(this));
 	}
 
 	/*
