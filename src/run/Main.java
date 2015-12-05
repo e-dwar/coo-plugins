@@ -2,6 +2,7 @@ package run;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import javax.swing.Timer;
 
@@ -31,21 +32,25 @@ public class Main {
 		// 5. lancer la commande 'cp edwar/AlloDummy dropins/Allo.class'
 		// 6. observer si les prints changent (AlloDummy n'implémente pas
 		// Plugin)
+		// 7. lancer la commande 'rm dropins/Allo.class'
+		// 8. observer si les prints changent
 		
 		new Timer(2000, new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
 				try {
+					File file = new File("dropins/Allo.class");
 					PluginLoader loader = new PluginLoader();
-					Plugin plugin = loader.loadPlugin("Allo");
+					Plugin plugin = loader.loadPlugin(file);
 					System.out.println(plugin.transform("allo"));
 				} catch (Exception e) {
-					System.out.println("actionPerformed: " + e.getMessage());
+					System.out.println("Error from main():\n  " + e.getMessage());
 				}
 			}
 		}).start();
 		while (true);		
 	}
 
+	@SuppressWarnings("unused")
 	private static void main1() {
 		PluginFinder finder = new PluginFinder("dropins");
 		PluginObserver logger = new PluginLogger();

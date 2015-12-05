@@ -3,11 +3,7 @@ package plugins;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-
 import exception.PluginLoadingException;
-
-
 
 public class PluginLoader extends ClassLoader {
 
@@ -15,45 +11,23 @@ public class PluginLoader extends ClassLoader {
 		super(PluginLoader.class.getClassLoader());
 	}
 
-    @Override
-    public Class<?> loadClass(String className) {
-        return findClass(className);
-    }
-
-    @Override
-    public Class<?> findClass(String className) {
-        try {
-            byte[] bytes = loadClassData(className);
-            return defineClass(className, bytes, 0, bytes.length);
-        } catch (IOException ioe) {
-            try {
-                return super.loadClass(className);
-            } catch (ClassNotFoundException ignore) { }
-            ioe.printStackTrace(System.out);
-            return null;
-        }
-    }
-
-    private byte[] loadClassData(String className) throws IOException {
-        File f = new File("dropins/" + className.replaceAll("\\.", "/") + ".class");
-        int size = (int) f.length();
-        byte buff[] = new byte[size];
-        FileInputStream fis = new FileInputStream(f);
-        DataInputStream dis = new DataInputStream(fis);
-        dis.readFully(buff);
-        dis.close();
-        return buff;
-    }
-    
-    public Plugin loadPlugin(String className) throws PluginLoadingException {
-    	try {
-    		return (Plugin)(this.loadClass(className).newInstance());
-    	} catch (Exception e) {
-    		throw new PluginLoadingException(e.getMessage());
-    	}
-    }
-    
-    public Plugin loadPlugin(File file) throws PluginLoadingException {
-    	return this.loadPlugin(file.getName());
-    }
+	public Plugin loadPlugin(File file) throws PluginLoadingException {
+		Class<?> cls = null;
+		String clsName = file.getName();
+		int i = clsName.lastIndexOf(".");
+		clsName = clsName.substring(0, i);
+		int size = (int) file.length();
+		byte bytes[] = new byte[size];
+		try {
+			FileInputStream fis = new FileInputStream(file);
+			DataInputStream dis = new DataInputStream(fis);
+			dis.readFully(bytes);
+			dis.close();
+			cls = defineClass(clsName, bytes, 0, bytes.length);
+			cls = super.loadClass(clsName);
+			return (Plugin) cls.newInstance();
+		} catch (Exception e) {
+			throw new PluginLoadingException(e.getMessage());
+		}
+	}
 }
