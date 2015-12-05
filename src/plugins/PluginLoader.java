@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import exception.PluginLoadingException;
+
 
 
 public class PluginLoader extends ClassLoader {
@@ -43,7 +45,15 @@ public class PluginLoader extends ClassLoader {
         return buff;
     }
     
-    public Plugin loadPlugin(String className) throws InstantiationException, IllegalAccessException {
-    	return (Plugin)(this.loadClass(className).newInstance());
+    public Plugin loadPlugin(String className) throws PluginLoadingException {
+    	try {
+    		return (Plugin)(this.loadClass(className).newInstance());
+    	} catch (Exception e) {
+    		throw new PluginLoadingException(e.getMessage());
+    	}
+    }
+    
+    public Plugin loadPlugin(File file) throws PluginLoadingException {
+    	return this.loadPlugin(file.getName());
     }
 }
