@@ -27,6 +27,8 @@ public class Main {
 		//  4. observer si les prints changent
 		//  5. lancer la commande 'cp edwar/AlloVnr dropins/Allo.class'
 		//  6. observer si les prints changent
+		//  5. lancer la commande 'cp edwar/AlloDummy dropins/Allo.class'
+		//  6. observer si les prints changent (AlloDummy n'implémente pas Plugin)
 
 		new Timer(2000, new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
