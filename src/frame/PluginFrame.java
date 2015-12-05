@@ -4,9 +4,15 @@ import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.BufferedReader;
+import java.util.HashMap;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import plugins.Plugin;
 
@@ -20,10 +26,12 @@ public class PluginFrame extends JFrame{
 	private JPanel container = new JPanel();
 	private JMenuBar mainMenu = new JMenuBar();
 	private JMenu menuFile = new JMenu(), menuTools = new JMenu(), menuHelp = new JMenu();
-	private JMenuItem menuToUpperCase = new JMenuItem(), menuToLowerCase = new JMenuItem(), menuExit = new JMenuItem(), menuAbout = new JMenuItem(), menuSave = new JMenuItem(), menuHowTo = new JMenuItem();
+	private JMenuItem menuExit = new JMenuItem(), menuAbout = new JMenuItem(), menuSave = new JMenuItem(), menuOpen = new JMenuItem(), menuHowTo = new JMenuItem();
 	private JTextArea textArea = new JTextArea(10,30);
 	
-	protected ArrayList<Plugin> plugins = new ArrayList<Plugin>();
+	protected HashMap<Plugin, JMenuItem> plugins = new HashMap<Plugin, JMenuItem>();
+	
+	private String filePath;
 	
 	/*
 	 * Constructors
@@ -37,9 +45,7 @@ public class PluginFrame extends JFrame{
 	/*
 	 * Methods
 	 */
-	
 	private void initComponents() {
-		System.out.println("Opening");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setTitle("Extandable Editor");
         this.setVisible(true);
@@ -55,83 +61,190 @@ public class PluginFrame extends JFrame{
 	}
 	
 	private void initMenu(){
-		menuFile.setText("File");
-		menuTools.setText("Tools");
-		menuHelp.setText("Help");
-				
-		menuSave.setText("Save");
-		menuToUpperCase.setText("To UpperCase");
-		menuToLowerCase.setText("To LowerCase");
-		menuExit.setText("Exit");
-		menuHowTo.setText("How to use it?");
-		menuAbout.setText("About the editor");
+		initMenuFile();
+		initMenuTools();
+		initMenuHelp();
 		
+		this.setJMenuBar(mainMenu);
+	}
+	
+	private void initMenuFile(){
+		//Main button
+		menuFile.setText("File");
+		
+		//Submenu
+		menuSave.setText("Save");
+		menuOpen.setText("Open text file");
+		menuExit.setText("Exit");
+		
+		//Actions
 		menuSave.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent evt){
 				save();
 			}
 		});
 		
-		for(final Plugin pluginTemp : plugins){
-			JMenuItem itemTemp = new JMenuItem();
-			itemTemp.setText(pluginTemp.getLabel());
-			
-			itemTemp.addActionListener(new ActionListener(){
-				public void actionPerformed(ActionEvent evt){
-					pluginTemp.transform(textArea.getText());
-				}
-			});
-		}
-		
+		menuOpen.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent evt){
+				open();
+			}
+		});
+				
 		menuExit.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 close();
             }
            });
 		
+		menuFile.add(menuOpen);
+		menuFile.add(menuSave);
+		menuFile.add(new JPopupMenu.Separator());
+		menuFile.add(menuExit);
+		
+		mainMenu.add(menuFile);
+	}
+	
+	private void initMenuTools(){
+		//Main button
+		menuTools.setText("Tools - 0");
+		
+		//Submenu & Actions
+		for(JMenuItem itemTemp : plugins.values()){			
+			menuTools.add(itemTemp);
+		}
+		
+		mainMenu.add(menuTools);
+		displayNbPlugin();
+	}
+	
+	private void initMenuHelp(){
+		//Main button
+		menuHelp.setText("Help");
+		
+		//Submenu
+		menuHowTo.setText("How to use it?");
+		menuAbout.setText("About the editor");
+		
+		//Actions
 		menuAbout.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt){
-				showDialog("test");
+				showDialog("Expendable Editor - FELV - 2015 ");
 			}
 		});
 		
 		menuHowTo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt){
-				showDialog("testtesttesttesttesttesttest\ntesttesttesttesttest\ntest");
+				showDialog("Visit our website : expendableeditor.org to get more informations.");
 			}
 		});
-		
-		menuTools.add(menuToUpperCase);
-		menuTools.add(menuToLowerCase);
-		menuFile.add(menuSave);
-		menuFile.add(new JPopupMenu.Separator());
-		menuFile.add(menuExit);
+				
 		menuHelp.add(menuHowTo);
 		menuHelp.add(new JPopupMenu.Separator());
 		menuHelp.add(menuAbout);
 		
-		mainMenu.add(menuFile);
-		mainMenu.add(menuTools);
 		mainMenu.add(menuHelp);
-		
-		this.setJMenuBar(mainMenu);
 	}
 	
-	public void close(){
+	private void close(){
 		this.dispose();
 	}
 	
-	public void showDialog(String text){
+	private void showDialog(String text){
 		JOptionPane.showMessageDialog(this, text);
 	}
 	
-	public void save(){
+	private void save(){
 		String text = textArea.getText();
 		System.out.println(text);
+		if(filePath == null || filePath.equals("")){
+			JFileChooser chooser = new JFileChooser();
+			chooser.setDialogTitle("Save");
+			if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION)
+			{
+				write(chooser.getSelectedFile().getAbsolutePath(), text);
+				filePath = chooser.getSelectedFile().getAbsolutePath();
+			}  
+		} else {
+			write(filePath, text);
+		}
+	}
+	
+	private void open(){
+		JFileChooser chooser = new JFileChooser();
+		chooser.setDialogTitle("Open text file");
+		chooser.setFileFilter(new FileNameExtensionFilter("text files (*.txt)", "txt"));
+		if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+		{
+			String path = chooser.getSelectedFile().getAbsolutePath();
+			if(path.substring(path.lastIndexOf(".")+1).equals("txt")){
+				filePath = chooser.getSelectedFile().getAbsolutePath();
+				try {
+					BufferedReader bufferedReader = new BufferedReader(new FileReader(filePath));
+					textArea.setText(bufferedReader.readLine());
+					bufferedReader.close();
+					showDialog("File is now opened !");
+				} catch (IOException e) {
+					showDialog("Something went wrong during the opening process.");
+				}
+			}
+			else {
+				showDialog("This file isn't a text file");
+			}
+		} 
 	}
 
-	public void update() {
-		System.out.println("I do something !!");
+	private void write(String absolutePath, String text) {
+		BufferedWriter bufferedWriter;
+		showDialog("The file has been saved on : " + absolutePath);
+		try {
+			bufferedWriter = new BufferedWriter(new FileWriter(absolutePath));
+			bufferedWriter.write(text,0,text.length());
+			bufferedWriter.newLine();
+			bufferedWriter.close();
+			showDialog("The saving process succeed.");
+		}
+		catch (IOException e){
+			showDialog("Something went wrong during the saving process.");
+		}
+	}
+
+	public void addPlugin(final Plugin plugin){
+		JMenuItem menuItem = new JMenuItem();
+		menuItem.setText(plugin.getLabel());
+		
+		menuItem.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent evt){
+				plugin.transform(textArea.getText());
+			}
+		});
+		
+		plugins.put(plugin, menuItem);
+		
+		menuTools.add(menuItem);
+	}
+	
+	public void update(Plugin plugin) {
+		this.addPlugin(plugin);
+	}
+	
+	public void delete(Plugin plugin){
+		System.out.println("TEST av = " + plugins.size());
+		for(Plugin pluginTemp : plugins.keySet()){
+			if(pluginTemp.getLabel().equals(plugin.getLabel())){
+				menuTools.remove(plugins.get(pluginTemp));
+			}
+		}
+		plugins.remove(plugin);
+		System.out.println("TEST ap = " + plugins.size());
+	}
+	
+	private void displayNbPlugin(){
+		Timer timer = new Timer(1000, new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				menuTools.setText("Tools - " + plugins.size());
+			}
+		});
+		timer.start();
 	}
 
 

@@ -1,11 +1,9 @@
 package execution;
 
 import plugins.Plugin;
-
-import finder.PluginFinder;
 import frame.PluginFrame;
 
-public class PluginUserInterface extends PluginUI {
+public class PluginUserInterface extends PluginObserver {
 
 	/*
 	 * Attributes
@@ -15,8 +13,8 @@ public class PluginUserInterface extends PluginUI {
 	/*
 	 * Constructors
 	 */
-	public PluginUserInterface(PluginFinder pluginFinder){
-		super(pluginFinder);
+	public PluginUserInterface(){
+		super();
 		pluginFrame = new PluginFrame();
 	}
 
@@ -26,27 +24,21 @@ public class PluginUserInterface extends PluginUI {
 	 * Methods
 	 */
 	@Override
-	public void onPluginAdded(Plugin plugin) {
-		plugins.add(plugin);
-		/*
-		 * Appelle la méthode dans PluginFrame qui ajoute un élément au menu
-		 */
+	public void addPlugin(Plugin plugin) {
+		super.addPlugin(plugin);
+		pluginFrame.addPlugin(plugin);
 	}
 
 	@Override
-	public void onPluginUpdated(Plugin plugin) {
-		updatePlugin(plugin);
-		/*
-		 * Appelle la méthode qui met à jour le plugin dans le menu
-		 */
+	public void updatePlugin(Plugin plugin) {
+		super.updatePlugin(plugin);
+		pluginFrame.update(plugin);
 	}
 
 	@Override
-	public void onPluginDeleted(Plugin plugin) {
-		plugins.remove(plugin);
-		/*
-		 * Appelle la méthode qui supprime le plugin du menu.
-		 */
+	public void deletePlugin(Plugin plugin) {
+		super.deletePlugin(plugin);
+		pluginFrame.delete(plugin);
 	}
 
 

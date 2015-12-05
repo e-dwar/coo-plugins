@@ -10,15 +10,28 @@ import plugins.Plugin;
 
 public abstract class PluginObserver implements Observer<PluginEvent> {
 
+	/*
+	 * Attributes
+	 */
 	protected PluginFinder pluginFinder;
 	protected ArrayList<Plugin> plugins;
 
-	public abstract void addPlugin(Plugin plugin);
-
-	public abstract void deletePlugin(Plugin plugin);
-
+	/*
+	 * Constructors
+	 */
 	public PluginObserver() {
 		plugins = new ArrayList<Plugin>();
+	}
+	
+	/*
+	 * Methods
+	 */
+	public void addPlugin(Plugin plugin){
+		plugins.add(plugin);
+	}
+	
+	public void deletePlugin(Plugin plugin){
+		plugins.remove(plugin);
 	}
 
 	public void updatePlugin(Plugin plugin) {

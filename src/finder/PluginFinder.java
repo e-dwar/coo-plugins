@@ -31,7 +31,7 @@ public class PluginFinder implements ActionListener {
 	}
 
 	/**
-	 * Add a listener to <code>this<code> pluginFinder.
+	 * Add an observer to <code>this<code> pluginFinder.
 	 */
 	public void addObserver(PluginObserver observer) {
 		observers.add(observer);
