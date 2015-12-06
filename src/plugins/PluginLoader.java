@@ -17,7 +17,7 @@ public class PluginLoader extends ClassLoader {
 		String clsName = file.getName();
 		clsName = clsName.substring(0, clsName.lastIndexOf("."));
 		clsName = clsName.replace('/', '.');
-		return clsName;
+		return "plugins." + clsName;
 	}
 
 	// see http://stackoverflow.com/a/3971771/1636522
