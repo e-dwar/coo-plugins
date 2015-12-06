@@ -11,15 +11,15 @@ import plugins.PluginLoader;
 
 import execution.PluginLogger;
 import execution.PluginObserver;
-import execution.PluginUserInterface;
 import finder.PluginFinder;
+import finder.PluginFinder2;
 
+@SuppressWarnings("unused")
 public class Main {
 
 	public static void main(String[] args) {
 		main1();
 	}
-	@SuppressWarnings("unused")
 
 	private static void main2() {
 		// instructions pour tester le loader:
@@ -52,11 +52,9 @@ public class Main {
 	}
 
 	private static void main1() {
-		PluginFinder finder = new PluginFinder("dropins");
+		PluginFinder2 finder = new PluginFinder2("dropins");
 		PluginObserver logger = new PluginLogger();
-		PluginObserver ui = new PluginUserInterface();
 		finder.addObserver(logger);
-		finder.addObserver(ui);
 		new Timer(1000, finder).start();
 		while (true);
 	}
