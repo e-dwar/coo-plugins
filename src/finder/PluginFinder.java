@@ -5,29 +5,35 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.*;
-
-import plugins.FakePlugin;
 import plugins.Plugin;
+import plugins.PluginLoader;
 
 import event.*;
+import exception.PluginLoadingException;
 import execution.*;
 
 public class PluginFinder implements ActionListener {
 
-	static protected ArrayList<File> pastList;
+	static protected HashMap<String,Plugin> mainMap;
 
 	protected File file;
 	protected PluginFilter filter;
-	protected ArrayList<File> newList;
+	protected HashMap<String,File> newMap;
 	protected ArrayList<PluginObserver> observers;
+	protected ArrayList<Plugin> adds;
+	protected ArrayList<Plugin> updates;
+	protected ArrayList<Plugin> deletions;
 
 	public PluginFinder(String dir) {
 		// if(!new File(dir).exists()) throw new NotAFileException();
 		file = new File(dir);
 		filter = new PluginFilter();
-		newList = new ArrayList<File>();
-		pastList = new ArrayList<File>();
+		newMap = new HashMap<String,File>();
+		mainMap = new HashMap<String,Plugin>();
 		observers = new ArrayList<PluginObserver>();
+		adds = new ArrayList<Plugin>();
+		updates = new ArrayList<Plugin>();
+		deletions = new ArrayList<Plugin>();
 	}
 
 	/**
@@ -41,14 +47,40 @@ public class PluginFinder implements ActionListener {
 	 * Check if files were added between 2 consecutive calls
 	 * 
 	 * @return true a file has been added
+	 * @throws PluginLoadingException 
 	 */
-	public boolean hasBeenAdded() {
-		for (File file : newList) {
-			if (!pastList.contains(file)) {
-				return true;
+	public ArrayList<Plugin> addPlugin() throws PluginLoadingException {
+		PluginLoader loader = new PluginLoader();
+		for (String name: newMap.keySet()) {
+			if (!mainMap.containsKey(name)) {
+				Plugin plugin = loader.loadPlugin(newMap.get(name));
+				adds.add(plugin);
+				mainMap.put(name,plugin);
 			}
 		}
-		return false;
+		return adds;
+	}
+
+	/**
+	 * Check if a file has been updated between 2 consecutive calls
+	 * 
+	 * @return true if a file was updated between 2 calls
+	 * @throws PluginLoadingException 
+	 */
+	public ArrayList<Plugin> updatePlugin() throws PluginLoadingException {
+		for (String name : newMap.keySet()) {
+			for (String pname : mainMap.keySet()) {
+				if (name.equals(pname)) {
+					if (System.currentTimeMillis() - newMap.get(name).lastModified() <= 1000) {
+						PluginLoader loader = new PluginLoader();
+						Plugin plugin = loader.loadPlugin(newMap.get(name));
+						updates.add(plugin);
+						mainMap.put(name,plugin);
+					}
+				}
+			}
+		}
+		return updates;
 	}
 
 	/**
@@ -56,34 +88,19 @@ public class PluginFinder implements ActionListener {
 	 * 
 	 * @return
 	 * @return true file has been deleted
+	 * @throws PluginLoadingException 
 	 */
-	public boolean hasBeenDeleted() {
-		for (File file : pastList) {
-			if (!newList.contains(file)) {
-				return true;
+	public ArrayList<Plugin> deletePlugin() throws PluginLoadingException {
+		for (String name : mainMap.keySet()) {
+			if (!newMap.containsKey(name)) {
+				Plugin plugin = mainMap.get(name);
+				deletions.add(plugin);
+				mainMap.remove(name);
 			}
 		}
-		return false;
+		return deletions;
 	}
-
-	/**
-	 * Check if a file has been updated between 2 consecutive calls
-	 * 
-	 * @return true if a file was updated between 2 calls
-	 */
-	public boolean hasBeenUpdated() {
-		for (File file : newList) {
-			for (File pfile : pastList) {
-				if (file.equals(pfile)) {
-					if (System.currentTimeMillis() - file.lastModified() <= 1000) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
-
+	
 	/**
 	 * Execute the action performed of
 	 * <code>this<code>registered PluginObservers.
@@ -92,26 +109,40 @@ public class PluginFinder implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		PluginEvent event = null;
-		Plugin plugin = new FakePlugin();
 		File[] files = file.listFiles(filter);
 		for (int i = 0; i < files.length; i++) {
-			newList.add(files[i]);
+			newMap.put(files[i].getName(), files[i]);
 		}
-		if (hasBeenAdded()) {
-			event = new PluginAddedEvent(plugin);
+        try {
+			addPlugin();
+			updatePlugin();
+			deletePlugin();
+		} catch (PluginLoadingException e1) {
+			System.out.println("exception");
+		}	
+		if (adds.size() != 0) {
+			for (Plugin plugin : adds) {
+				event = new PluginAddedEvent(plugin);
+				this.updateObservers(event);
+			}
 		}
-		if (hasBeenUpdated()) {
-			event = new PluginUpdatedEvent(plugin);
+		if (updates.size() != 0) {
+			for (Plugin plugin : updates) {
+				event = new PluginUpdatedEvent(plugin);
+				this.updateObservers(event);
+			}
 		}
-		if (hasBeenDeleted()) {
-			event = new PluginDeletedEvent(plugin);
+		if (deletions.size() != 0) {
+			for (Plugin plugin : deletions) {
+				event = new PluginDeletedEvent(plugin);
+				mainMap.remove(plugin.getLabel());
+				this.updateObservers(event);
+			}
 		}
-		if (event != null) {
-			this.updateObservers(event);
-		}
-		pastList.clear();
-		pastList.addAll(newList);
-		newList.clear();
+		newMap.clear();
+		adds.clear();
+		updates.clear();
+		deletions.clear();
 	}
 
 	public void updateObservers(PluginEvent event) {

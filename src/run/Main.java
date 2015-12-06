@@ -6,19 +6,20 @@ import java.io.File;
 
 import javax.swing.Timer;
 
+import plugins.Plugin;
+import plugins.PluginLoader;
+
 import execution.PluginLogger;
 import execution.PluginObserver;
 import execution.PluginUserInterface;
 import finder.PluginFinder;
 
-import plugins.Plugin;
-import plugins.PluginLoader;
-
 public class Main {
 
 	public static void main(String[] args) {
-		main2();
+		main1();
 	}
+	@SuppressWarnings("unused")
 
 	private static void main2() {
 		// instructions pour tester le loader:
@@ -50,7 +51,6 @@ public class Main {
 		while (true);		
 	}
 
-	@SuppressWarnings("unused")
 	private static void main1() {
 		PluginFinder finder = new PluginFinder("dropins");
 		PluginObserver logger = new PluginLogger();

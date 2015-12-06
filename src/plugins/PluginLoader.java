@@ -20,7 +20,7 @@ public class PluginLoader extends ClassLoader {
 		int i = clsName.lastIndexOf(".");
 		int size = (int) file.length();
 		byte bytes[] = new byte[size];
-		clsName = clsName.substring(0, i);
+		clsName = "plugins." + clsName.substring(0, i);
 		try {
 			FileInputStream fis = new FileInputStream(file);
 			DataInputStream dis = new DataInputStream(fis);
