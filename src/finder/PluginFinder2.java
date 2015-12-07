@@ -64,7 +64,6 @@ public class PluginFinder2 implements ActionListener {
 	/**
 	 * @see java.awt.event.ActionListener#actionPerfomed(ActionEvent)
 	 */
-	@Override
 	public void actionPerformed(ActionEvent actionEvent) {
 		File[] files = directory.listFiles(filter);
 		HashMap<String, Value> fresh = new HashMap<String, Value>();
