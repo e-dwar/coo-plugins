@@ -9,10 +9,17 @@ import exception.PluginLoadingException;
 
 public class PluginLoader extends ClassLoader {
 
+	/*
+	 * Constructors
+	 */
 	public PluginLoader() {
 		super(PluginLoader.class.getClassLoader());
 	}
 	
+	
+	/*
+	 * Methods
+	 */
 	protected String toClassName(File file) {
 		String clsName = file.getName();
 		clsName = clsName.substring(0, clsName.lastIndexOf("."));

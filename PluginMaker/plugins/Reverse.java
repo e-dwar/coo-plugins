@@ -1,3 +1,5 @@
+package plugins;
+
 public class Reverse implements Plugin{
 
   public String transform(String s){

@@ -11,8 +11,9 @@ import plugins.PluginLoader;
 
 import execution.PluginLogger;
 import execution.PluginObserver;
+import execution.PluginUserInterface;
 import finder.PluginFinder;
-import finder.PluginFinder2;
+import finder.PluginFinder;
 
 @SuppressWarnings("unused")
 public class Main {
@@ -52,9 +53,11 @@ public class Main {
 	}
 
 	private static void main1() {
-		PluginFinder2 finder = new PluginFinder2("dropins");
+		PluginFinder finder = new PluginFinder("dropins");
 		PluginObserver logger = new PluginLogger();
+		PluginObserver ui = new PluginUserInterface();
 		finder.addObserver(logger);
+		finder.addObserver(ui);
 		new Timer(1000, finder).start();
 		while (true);
 	}

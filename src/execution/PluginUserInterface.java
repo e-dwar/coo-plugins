@@ -40,6 +40,13 @@ public class PluginUserInterface extends PluginObserver {
 		super.deletePlugin(plugin);
 		pluginFrame.delete(plugin);
 	}
+	
+	/**
+	 * @return the attribute pluginFrame.
+	 */
+	public PluginFrame getPluginFrame(){
+		return this.pluginFrame;
+	}
 
 
 }

@@ -2,9 +2,9 @@
 
 SOURCES=AddSpaceBetweenLetters.java Alternate.java Reverse.java Main.java
 
-CLASSPATH = .
+CLASSPATH = ..
 
-CLASSES= bin
+CLASSES= ../bin
 
 all: compile run
 

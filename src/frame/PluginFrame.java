@@ -47,7 +47,7 @@ public class PluginFrame extends JFrame{
 	 */
 	private void initComponents() {
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setTitle("Extandable Editor");
+        this.setTitle("Extendable Editor");
         this.setVisible(true);
         this.setLocationRelativeTo (null);
         JScrollPane areaScrollPane = new JScrollPane(textArea);
@@ -57,7 +57,6 @@ public class PluginFrame extends JFrame{
         container.setBackground(Color.white);
         container.add(areaScrollPane);
         this.setContentPane(container);
-        
 	}
 	
 	private void initMenu(){
@@ -114,7 +113,6 @@ public class PluginFrame extends JFrame{
 		}
 		
 		mainMenu.add(menuTools);
-		displayNbPlugin();
 	}
 	
 	private void initMenuHelp(){
@@ -128,13 +126,13 @@ public class PluginFrame extends JFrame{
 		//Actions
 		menuAbout.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt){
-				showDialog("Expendable Editor - FELV - 2015 ");
+				showDialog("Extendable Editor - FELV - 2015 ");
 			}
 		});
 		
 		menuHowTo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt){
-				showDialog("Visit our website : expendableeditor.org to get more informations.");
+				showDialog("Visit our website : extendableeditor.org to get more informations.");
 			}
 		});
 				
@@ -214,37 +212,35 @@ public class PluginFrame extends JFrame{
 		
 		menuItem.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent evt){
-				plugin.transform(textArea.getText());
+				textArea.setText(plugin.transform(textArea.getText()));
 			}
 		});
 		
 		plugins.put(plugin, menuItem);
 		
 		menuTools.add(menuItem);
+		menuTools.setText("Tools [" + plugins.size() + "]");
 	}
 	
 	public void update(Plugin plugin) {
+		this.delete(plugin);
 		this.addPlugin(plugin);
 	}
 	
 	public void delete(Plugin plugin){
-		System.out.println("TEST av = " + plugins.size());
+		Plugin toDelete = null;
 		for(Plugin pluginTemp : plugins.keySet()){
 			if(pluginTemp.getLabel().equals(plugin.getLabel())){
 				menuTools.remove(plugins.get(pluginTemp));
+				toDelete = pluginTemp;
 			}
 		}
-		plugins.remove(plugin);
-		System.out.println("TEST ap = " + plugins.size());
+		plugins.remove(toDelete);
+		menuTools.setText("Tools [" + plugins.size() + "]");
 	}
-	
-	private void displayNbPlugin(){
-		Timer timer = new Timer(1000, new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				menuTools.setText("Tools - " + plugins.size());
-			}
-		});
-		timer.start();
+		
+	public HashMap<Plugin, JMenuItem> getPlugins(){
+		return this.plugins;
 	}
 
 

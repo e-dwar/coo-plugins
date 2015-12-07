@@ -26,29 +26,42 @@ public abstract class PluginObserver implements Observer<PluginEvent> {
 	/*
 	 * Methods
 	 */
+	/**
+	 * Adds a new plugin to the list plugins.
+	 * @param plugin
+	 */
 	public void addPlugin(Plugin plugin){
 		plugins.add(plugin);
 	}
 	
+	/**
+	 * Delete the given plugin from the list plugins.
+	 * @param plugin
+	 */
 	public void deletePlugin(Plugin plugin){
 		plugins.remove(plugin);
 	}
 
+	/**
+	 * Update the given plugin from the list plugins.
+	 * @param plugin
+	 */
 	public void updatePlugin(Plugin plugin) {
-		Plugin toDelete = null;
-		for (Plugin pluginTemp : plugins) {
-			if (pluginTemp.getLabel().equals(plugin.getLabel())) {
-				toDelete = pluginTemp;
-			}
-		}
-		plugins.remove(toDelete);
-		plugins.add(plugin);
+		this.deletePlugin(plugin);
+		this.addPlugin(plugin);
 	}
 
+	/**
+	 * @return the list of plugins.
+	 */
 	public ArrayList<Plugin> getPlugins() {
 		return this.plugins;
 	}
 
+	/**
+	 * Calls the methods which matchs with the type of the event.
+	 * If event is an instance of PluginAddedEvent, it will calls the method addPlugin()
+	 */
 	public void update(PluginEvent event) {
 		event.visitPluginObserver(this);
 	}

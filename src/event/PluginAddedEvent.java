@@ -5,10 +5,16 @@ import plugins.Plugin;
 
 public class PluginAddedEvent extends PluginEvent {
 
+	/*
+	 * Constructors
+	 */
 	public PluginAddedEvent(Plugin plugin) {
 		super(plugin);
 	}
 
+	/*
+	 * Methods
+	 */
 	@Override
 	public void visitPluginObserver(PluginObserver observer) {
 		observer.addPlugin(plugin);

@@ -2,13 +2,27 @@ package plugins;
 
 import static org.junit.Assert.*;
 
+import org.junit.Before;
 import org.junit.Test;
 
 public class PluginTest {
 
-	@Test
-	public void test() {
-		fail("Not yet implemented");
+	protected Plugin plugin;
+	
+	@Before
+	public void init(){
+		plugin = new FakePlugin();
 	}
-
+	
+	@Test
+	public void transformTest(){
+		String text = "Text";
+		text = plugin.transform(text);
+		assertNull(text);
+	}
+	
+	@Test
+	public void getLabel(){
+		assertEquals("FakePlugin", plugin.getLabel());
+	}
 }

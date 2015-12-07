@@ -1,154 +1,96 @@
 package finder;
 
-import java.awt.event.ActionEvent;
-
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.File;
 import java.util.*;
-import plugins.Plugin;
-import plugins.PluginLoader;
-
-import event.*;
 import exception.PluginLoadingException;
-import execution.*;
+import execution.PluginObserver;
+import plugins.*;
+import event.*;
 
 public class PluginFinder implements ActionListener {
 
-	static protected HashMap<String,Plugin> mainMap;
-
-	protected File file;
+	protected File directory;
 	protected PluginFilter filter;
-	protected HashMap<String,File> newMap;
+	protected HashMap<String, Value> cache;
 	protected ArrayList<PluginObserver> observers;
-	protected ArrayList<Plugin> adds;
-	protected ArrayList<Plugin> updates;
-	protected ArrayList<Plugin> deletions;
 
-	public PluginFinder(String dir) {
-		// if(!new File(dir).exists()) throw new NotAFileException();
-		file = new File(dir);
-		filter = new PluginFilter();
-		newMap = new HashMap<String,File>();
-		mainMap = new HashMap<String,Plugin>();
-		observers = new ArrayList<PluginObserver>();
-		adds = new ArrayList<Plugin>();
-		updates = new ArrayList<Plugin>();
-		deletions = new ArrayList<Plugin>();
+	public PluginFinder(String directory) {
+		this.observers = new ArrayList<PluginObserver>();
+		this.directory = new File(directory);
+		this.cache = new HashMap<String, Value>();
+		this.filter = new PluginFilter();
 	}
 
 	/**
-	 * Add an observer to <code>this<code> pluginFinder.
+	 * Adds an observer to <code>this<code> pluginFinder.
+	 * 
+	 * @param observer The observer to add.
 	 */
 	public void addObserver(PluginObserver observer) {
 		observers.add(observer);
 	}
 
 	/**
-	 * Check if files were added between 2 consecutive calls
+	 * Notifies all observers when something changes in <code>directory</code>.
 	 * 
-	 * @return true a file has been added
-	 * @throws PluginLoadingException 
+	 * @param event
 	 */
-	public ArrayList<Plugin> addPlugin() throws PluginLoadingException {
-		PluginLoader loader = new PluginLoader();
-		for (String name: newMap.keySet()) {
-			if (!mainMap.containsKey(name)) {
-				Plugin plugin = loader.loadPlugin(newMap.get(name));
-				adds.add(plugin);
-				mainMap.put(name,plugin);
-			}
-		}
-		return adds;
-	}
-
-	/**
-	 * Check if a file has been updated between 2 consecutive calls
-	 * 
-	 * @return true if a file was updated between 2 calls
-	 * @throws PluginLoadingException 
-	 */
-	public ArrayList<Plugin> updatePlugin() throws PluginLoadingException {
-		for (String name : newMap.keySet()) {
-			for (String pname : mainMap.keySet()) {
-				if (name.equals(pname)) {
-					if (System.currentTimeMillis() - newMap.get(name).lastModified() <= 1000) {
-						PluginLoader loader = new PluginLoader();
-						Plugin plugin = loader.loadPlugin(newMap.get(name));
-						updates.add(plugin);
-						mainMap.put(name,plugin);
-					}
-				}
-			}
-		}
-		return updates;
-	}
-
-	/**
-	 * Check if files were deleted between 2 consecutive calls
-	 * 
-	 * @return
-	 * @return true file has been deleted
-	 * @throws PluginLoadingException 
-	 */
-	public ArrayList<Plugin> deletePlugin() throws PluginLoadingException {
-		for (String name : mainMap.keySet()) {
-			if (!newMap.containsKey(name)) {
-				Plugin plugin = mainMap.get(name);
-				deletions.add(plugin);
-				mainMap.remove(name);
-			}
-		}
-		return deletions;
-	}
-	
-	/**
-	 * Execute the action performed of
-	 * <code>this<code>registered PluginObservers.
-	 * 
-	 * @param the action event to be executed.
-	 */
-	public void actionPerformed(ActionEvent e) {
-		PluginEvent event = null;
-		File[] files = file.listFiles(filter);
-		for (int i = 0; i < files.length; i++) {
-			newMap.put(files[i].getName(), files[i]);
-		}
-        try {
-			addPlugin();
-			updatePlugin();
-			deletePlugin();
-		} catch (PluginLoadingException e1) {
-			System.out.println("exception");
-		}	
-		if (adds.size() != 0) {
-			for (Plugin plugin : adds) {
-				event = new PluginAddedEvent(plugin);
-				this.updateObservers(event);
-			}
-		}
-		if (updates.size() != 0) {
-			for (Plugin plugin : updates) {
-				event = new PluginUpdatedEvent(plugin);
-				this.updateObservers(event);
-			}
-		}
-		if (deletions.size() != 0) {
-			for (Plugin plugin : deletions) {
-				event = new PluginDeletedEvent(plugin);
-				mainMap.remove(plugin.getLabel());
-				this.updateObservers(event);
-			}
-		}
-		newMap.clear();
-		adds.clear();
-		updates.clear();
-		deletions.clear();
-	}
-
 	public void updateObservers(PluginEvent event) {
 		for (PluginObserver observer : observers) {
 			observer.update(event);
 		}
 	}
 
+	protected boolean hasBeenAdded(File file) {
+		return !cache.containsKey(file.getName());
+	}
+
+	protected boolean hasBeenUpdated(File file) {
+		Value value = cache.get(file.getName());
+		return value.lastModified != file.lastModified();
+	}
+
+	protected class Value {
+		public Plugin plugin;
+		public long lastModified;
+
+		public Value(Plugin plugin, long lastModified) {
+			this.plugin = plugin;
+			this.lastModified = lastModified;
+		}
+	};
+
+	/**
+	 * @see java.awt.event.ActionListener#actionPerfomed(ActionEvent)
+	 */
+	public void actionPerformed(ActionEvent actionEvent) {
+		File[] files = directory.listFiles(filter);
+		HashMap<String, Value> fresh = new HashMap<String, Value>();
+		for (File file : files) {
+			String name = file.getName();
+			if (hasBeenAdded(file) || hasBeenUpdated(file)) {
+				try {
+					PluginLoader loader = new PluginLoader();
+					Plugin plugin = loader.loadPlugin(file);
+					Value value = new Value(plugin, file.lastModified());
+					fresh.put(name, value);
+					if (hasBeenAdded(file)) {
+						updateObservers(new PluginAddedEvent(plugin));
+					} else {
+						cache.remove(name);
+						updateObservers(new PluginUpdatedEvent(plugin));
+					}
+				} catch (PluginLoadingException e) {
+					System.out.println(e.getMessage());
+				}
+			} else {
+				fresh.put(name, cache.remove(name));
+			}
+		}
+		for (Value value : cache.values()) {
+			updateObservers(new PluginDeletedEvent(value.plugin));
+		}
+		cache = fresh;
+	}
 }
