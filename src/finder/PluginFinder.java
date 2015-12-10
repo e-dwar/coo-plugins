@@ -47,8 +47,12 @@ public class PluginFinder implements ActionListener {
 	}
 
 	protected boolean hasBeenUpdated(File file) {
-		Value value = cache.get(file.getName());
-		return value.lastModified != file.lastModified();
+		if (cache.containsKey(file.getName())) {
+			Value value = cache.get(file.getName());
+			return value.lastModified != file.lastModified();			
+		} else {
+			return false;
+		}
 	}
 
 	protected class Value {

@@ -1,10 +1,9 @@
 package doubles;
 
 import java.io.File;
-
+import java.util.ArrayList;
 import plugins.Plugin;
-import plugins.PluginLoader;
-import exception.PluginLoadingException;
+import execution.PluginObserver;
 
 public class PluginFinder extends finder.PluginFinder {
 
@@ -13,21 +12,31 @@ public class PluginFinder extends finder.PluginFinder {
 	}
 
 	public PluginLoader createPluginLoader() {
-		return new PluginLoader() {
-			
-			public Plugin loadPlugin (File file) throws PluginLoadingException {
-				return new Plugin(){
+		return new PluginLoader();
+	}
+	
+	protected Plugin createPlugin(){
+		return new Plugin(){
 
-					public String transform(String text) {
-						return "transform(" + text + ")";
-					}
+			public String transform(String text) {
+				return "transform(" + text + ")";
+			}
 
-					public String getLabel() {
-						return "fake";
-					}
-					
-				};
+			public String getLabel() {
+				return "fake";
 			}
 		};
+	}
+	
+	public Value putCache(File file) {
+		Plugin plugin = createPlugin();
+		long lastModified = file.lastModified();
+		Value value = new Value(plugin, lastModified);
+		cache.put(file.getName(), value);
+		return value;
+	}
+	
+	public ArrayList<PluginObserver> getObservers() {
+		return observers;
 	}
 }

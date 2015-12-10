@@ -20,4 +20,8 @@ public class PluginDeletedEvent extends PluginEvent {
 		observer.deletePlugin(plugin);
 	}
 	
+	public boolean equals(Object o) {
+		return o instanceof PluginDeletedEvent;
+	}
+	
 }

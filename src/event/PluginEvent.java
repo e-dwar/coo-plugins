@@ -23,6 +23,7 @@ public abstract class PluginEvent implements Event {
 	public Plugin getPlugin() {
 		return plugin;
 	}
-	
+
 	public abstract void visitPluginObserver(PluginObserver observer);
+	public abstract boolean equals(Object o);
 }

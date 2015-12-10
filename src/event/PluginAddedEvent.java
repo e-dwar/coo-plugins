@@ -20,4 +20,8 @@ public class PluginAddedEvent extends PluginEvent {
 		observer.addPlugin(plugin);
 	}
 	
+	public boolean equals(Object o) {
+		return o instanceof PluginAddedEvent;
+	}
+	
 }
