@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import event.PluginAddedEvent;
 import plugins.FakePlugin;
 import plugins.Plugin;
 
@@ -33,7 +34,7 @@ public abstract class PluginObserverTest<O extends PluginObserver> {
 	@Test
 	public void updatePluginTest(){
 		assertTrue(pluginObserver.getPlugins().isEmpty());
-		pluginObserver.addPlugin(plugin);
+		pluginObserver.getPlugins().add(plugin);
 		assertEquals(1, pluginObserver.getPlugins().size());
 		pluginObserver.updatePlugin(plugin);
 		assertEquals(1, pluginObserver.getPlugins().size());
