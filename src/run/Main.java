@@ -53,7 +53,7 @@ public class Main {
 	}
 
 	private static void main1() {
-		PluginFinder finder = new PluginFinder("dropins");
+		PluginFinder finder = new PluginFinder(new File("dropins"));
 		PluginObserver logger = new PluginLogger();
 		PluginObserver ui = new PluginUserInterface();
 		finder.addObserver(logger);

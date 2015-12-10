@@ -15,9 +15,9 @@ public class PluginFinder implements ActionListener {
 	protected HashMap<String, Value> cache;
 	protected ArrayList<PluginObserver> observers;
 
-	public PluginFinder(String directory) {
+	public PluginFinder(File directory) {
+		this.directory = directory;
 		this.observers = new ArrayList<PluginObserver>();
-		this.directory = new File(directory);
 		this.cache = new HashMap<String, Value>();
 		this.filter = new PluginFilter();
 	}
@@ -71,7 +71,7 @@ public class PluginFinder implements ActionListener {
 			String name = file.getName();
 			if (hasBeenAdded(file) || hasBeenUpdated(file)) {
 				try {
-					PluginLoader loader = new PluginLoader();
+					PluginLoader loader = createPluginLoader();
 					Plugin plugin = loader.loadPlugin(file);
 					Value value = new Value(plugin, file.lastModified());
 					fresh.put(name, value);
@@ -92,5 +92,9 @@ public class PluginFinder implements ActionListener {
 			updateObservers(new PluginDeletedEvent(value.plugin));
 		}
 		cache = fresh;
+	}
+	
+	protected PluginLoader createPluginLoader(){
+		return new PluginLoader();
 	}
 }
