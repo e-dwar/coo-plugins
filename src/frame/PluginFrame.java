@@ -219,7 +219,7 @@ public class PluginFrame extends JFrame{
 		plugins.put(plugin, menuItem);
 		
 		menuTools.add(menuItem);
-		menuTools.setText("Tools [" + plugins.size() + "]");
+		updateMenuTools();
 	}
 	
 	public void update(Plugin plugin) {
@@ -228,19 +228,27 @@ public class PluginFrame extends JFrame{
 	}
 	
 	public void delete(Plugin plugin){
-		Plugin toDelete = null;
-		for(Plugin pluginTemp : plugins.keySet()){
-			if(pluginTemp.getLabel().equals(plugin.getLabel())){
-				menuTools.remove(plugins.get(pluginTemp));
-				toDelete = pluginTemp;
-			}
-		}
-		plugins.remove(toDelete);
-		menuTools.setText("Tools [" + plugins.size() + "]");
+		Plugin p = searchPlugin(plugin);
+		menuTools.remove(plugins.get(p));
+		plugins.remove(p);
+		updateMenuTools();
 	}
 		
 	public HashMap<Plugin, JMenuItem> getPlugins(){
 		return this.plugins;
+	}
+	
+	public Plugin searchPlugin(Plugin plugin){
+		for(Plugin pluginTemp : plugins.keySet()){
+			if(pluginTemp.getLabel().equals(plugin.getLabel())){
+				return pluginTemp;
+			}
+		}
+		return null;
+	}
+	
+	public void updateMenuTools(){
+		menuTools.setText("Tools [" + plugins.size() + "]");
 	}
 
 
