@@ -20,7 +20,7 @@ public class PluginFrameTest {
 	}
 
 	@Test
-	public void searchPlugin() {
+	public void searchPluginTest() {
 		assertNull(pluginFrame.searchPlugin(plugin));
 		pluginFrame.addPlugin(plugin);
 		assertEquals(plugin, pluginFrame.searchPlugin(plugin));
