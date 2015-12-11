@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import event.PluginAddedEvent;
 import plugins.FakePlugin;
 import plugins.Plugin;
 
